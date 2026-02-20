@@ -13,7 +13,6 @@ import {
   Image as ImageIcon, 
   Layout, 
   Table as TableIcon, 
-  X, 
   ChevronUp, 
   ChevronDown, 
   Database,
