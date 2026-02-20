@@ -458,7 +458,6 @@ const App: React.FC = () => {
         .tp-list-item { display: flex; gap: 0.25rem; margin-bottom: 0.5rem; }
         .tp-icon-btn { padding: 0.5rem; color: var(--tp-danger); background: transparent; border: none; cursor: pointer; }
         .tp-add-btn { width: 100%; padding: 0.625rem; background-color: var(--tp-primary-light); border: 1px dashed var(--tp-primary-border); border-radius: 0.5rem; font-size: 10px; font-weight: bold; color: var(--tp-primary); cursor: pointer; }
-        .tp-empty-selection { height: 10rem; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed var(--tp-border); border-radius: 1rem; background-color: var(--tp-bg-surface-alt); color: var(--tp-text-light); text-align: center; }
 
         /* Template Elements */
         .tp-main-header { display: flex; justify-content: space-between; border-bottom: 4px solid var(--tp-border-dark); padding-bottom: 1rem; }
