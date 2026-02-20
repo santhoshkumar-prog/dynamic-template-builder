@@ -46,7 +46,7 @@ type ElementType =
   | 'CHECKBOX_GROUP' 
   | 'TEXT_AREA' 
   | 'ATTACHMENT'
-  | 'FOUR_FIELD_GRID'; // Added for the 25% column element
+  | 'FOUR_FIELD_GRID';
 
 interface TemplateElement {
   id: string;
@@ -274,10 +274,8 @@ const App: React.FC = () => {
 
   const selectedElement = elements.find(el => el.id === selectedId);
 
-  // Helper for generating IDs safely without crypto.randomUUID
   const generateId = () => Math.random().toString(36).substring(2, 11);
 
-  // --- CONFIG ---
   const COMPONENT_TYPES: Record<ElementType, ComponentConfig> = {
     MAIN_HEADER: { type: 'MAIN_HEADER', label: 'Logo & Title Header', icon: <Layout size={18} />, defaultProps: { companyName: 'TIMEC Oil & Gas, Inc.', reportTitle: 'Preliminary Incident Report', docId: 'TMF-8300-SA-0140', logoUrl: null } },
     TITLE: { type: 'TITLE', label: 'Title Header', icon: <Heading size={18} />, defaultProps: { companyName: 'TIMEC Oil & Gas, Inc.', reportTitle: 'Preliminary Incident Report', docId: 'TMF-8300-SA-0140' } },
@@ -302,7 +300,6 @@ const App: React.FC = () => {
     ATTACHMENT: { type: 'ATTACHMENT', label: 'Attachment', icon: <Paperclip size={18} />, defaultProps: { label: 'Attachment', mapping: 'none', useCustomSize: false, customWidth: 200, customHeight: 200 } },
   };
 
-  // --- ACTIONS ---
   const addElement = (type: ElementType) => {
     const newElement: TemplateElement = { 
         id: generateId(), 
@@ -332,7 +329,6 @@ const App: React.FC = () => {
     setElements(newElements);
   };
 
-  // Drag and Drop
   const handleDragStart = (index: number) => setDraggedIndex(index);
   const handleDragOver = (e: DragEvent<HTMLDivElement>, index: number) => {
     e.preventDefault();
@@ -346,7 +342,6 @@ const App: React.FC = () => {
   };
   const handleDragEnd = () => setDraggedIndex(null);
 
-  // Data helpers
   const getMappedValue = (fieldId: string): any => { const field = FORM_DATA_FIELDS.find(f => f.id === fieldId); return field ? field.value : ''; };
   const getTableData = (fieldId: string): FormField | null => { const field = FORM_DATA_FIELDS.find(f => f.id === fieldId); return field && field.type === 'table' ? field : null; };
 
@@ -371,7 +366,6 @@ const App: React.FC = () => {
     setTimeout(() => window.print(), 300);
   };
 
-  // --- RENDERER ROUTER ---
   const RenderElement = ({ el, isPreview = false, isLastInSectionHeader = false }: { el: TemplateElement, isPreview?: boolean, isLastInSectionHeader?: boolean }) => {
     const props = { ...el.props, isPreview, isFlush: isLastInSectionHeader };
     
@@ -379,14 +373,14 @@ const App: React.FC = () => {
       case 'MAIN_HEADER': return <TemplateMainHeader {...props} />;
       case 'TITLE': return <TemplateTitle {...props} />;
       case 'SECTION_HEADER': return <TemplateSectionHeader {...props} />;
-      case 'SINGLE_ROW': return <TemplateSingleRow {...props} value={getMappedValue(el.props.mapping)} />;
-      case 'ROW': return <TemplateRow {...props} leftValue={getMappedValue(el.props.leftMapping)} rightValue={getMappedValue(el.props.rightMapping)} />;
-      case 'FOUR_FIELD_GRID': return <TemplateFourFieldGrid {...props} f1Value={getMappedValue(el.props.f1Mapping)} f2Value={getMappedValue(el.props.f2Mapping)} f3Value={getMappedValue(el.props.f3Mapping)} f4Value={getMappedValue(el.props.f4Mapping)} />;
-      case 'SIGNATURE': return <TemplateSignature {...props} value={getMappedValue(el.props.mapping)} />;
+      case 'SINGLE_ROW': return <TemplateSingleRow {...props} value={getMappedValue(el.props.mapping)} mapping={el.props.mapping} />;
+      case 'ROW': return <TemplateRow {...props} leftValue={getMappedValue(el.props.leftMapping)} leftMapping={el.props.leftMapping} rightValue={getMappedValue(el.props.rightMapping)} rightMapping={el.props.rightMapping} />;
+      case 'FOUR_FIELD_GRID': return <TemplateFourFieldGrid {...props} f1Value={getMappedValue(el.props.f1Mapping)} f1Mapping={el.props.f1Mapping} f2Value={getMappedValue(el.props.f2Mapping)} f2Mapping={el.props.f2Mapping} f3Value={getMappedValue(el.props.f3Mapping)} f3Mapping={el.props.f3Mapping} f4Value={getMappedValue(el.props.f4Mapping)} f4Mapping={el.props.f4Mapping} />;
+      case 'SIGNATURE': return <TemplateSignature {...props} value={getMappedValue(el.props.mapping)} mapping={el.props.mapping} />;
       case 'TABLE': return <TemplateTable {...props} sourceTable={getTableData(el.props.tableMapping)} />;
-      case 'CHECKBOX_GROUP': return <TemplateCheckboxGroup {...props} checkedValues={getMappedValue(el.props.mapping)} />;
-      case 'TEXT_AREA': return <TemplateTextArea {...props} value={getMappedValue(el.props.mapping)} />;
-      case 'ATTACHMENT': return <TemplateAttachment {...props} value={getMappedValue(el.props.mapping)} />;
+      case 'CHECKBOX_GROUP': return <TemplateCheckboxGroup {...props} checkedValues={getMappedValue(el.props.mapping)} mapping={el.props.mapping} />;
+      case 'TEXT_AREA': return <TemplateTextArea {...props} value={getMappedValue(el.props.mapping)} mapping={el.props.mapping} />;
+      case 'ATTACHMENT': return <TemplateAttachment {...props} value={getMappedValue(el.props.mapping)} mapping={el.props.mapping} />;
       default: return null;
     }
   };
@@ -409,22 +403,12 @@ const App: React.FC = () => {
           >
             {isSelected && (
               <div className="tp-element-controls no-print">
-                <button onClick={(e) => { e.stopPropagation(); moveElement(index, 'up'); }} disabled={index === 0} className="tp-element-controls__btn">
-                  <ChevronUp size={14} />
-                </button>
-                <button onClick={(e) => { e.stopPropagation(); moveElement(index, 'down'); }} disabled={index === elements.length - 1} className="tp-element-controls__btn">
-                  <ChevronDown size={14} />
-                </button>
-                <button onClick={(e) => { e.stopPropagation(); removeElement(el.id); }} className="tp-element-controls__btn tp-element-controls__btn--danger">
-                  <Trash2 size={14} />
-                </button>
+                <button onClick={(e) => { e.stopPropagation(); moveElement(index, 'up'); }} disabled={index === 0} className="tp-element-controls__btn"><ChevronUp size={14} /></button>
+                <button onClick={(e) => { e.stopPropagation(); moveElement(index, 'down'); }} disabled={index === elements.length - 1} className="tp-element-controls__btn"><ChevronDown size={14} /></button>
+                <button onClick={(e) => { e.stopPropagation(); removeElement(el.id); }} className="tp-element-controls__btn tp-element-controls__btn--danger"><Trash2 size={14} /></button>
               </div>
             )}
-            {!isSelected && !isPreview && (
-              <div className="tp-drag-handle no-print">
-                <GripVertical size={20} />
-              </div>
-            )}
+            {!isSelected && !isPreview && <div className="tp-drag-handle no-print"><GripVertical size={20} /></div>}
             <RenderElement el={el} isPreview={isPreview} isLastInSectionHeader={isFollowsSection} />
           </div>
         );
@@ -435,22 +419,7 @@ const App: React.FC = () => {
   return (
     <div className="tp-app">
       <style dangerouslySetInnerHTML={{ __html: `
-        :root {
-          --tp-primary: #4f46e5;
-          --tp-primary-hover: #4338ca;
-          --tp-primary-light: #eef2ff;
-          --tp-primary-border: #c7d2fe;
-          --tp-text-main: #0f172a;
-          --tp-text-muted: #64748b;
-          --tp-text-light: #94a3b8;
-          --tp-bg-main: #f1f5f9;
-          --tp-bg-surface: #ffffff;
-          --tp-bg-surface-alt: #f8fafc;
-          --tp-border: #e2e8f0;
-          --tp-border-dark: #000000;
-          --tp-danger: #ef4444;
-          --tp-danger-bg: #fef2f2;
-        }
+        :root { --tp-primary: #4f46e5; --tp-primary-hover: #4338ca; --tp-primary-light: #eef2ff; --tp-primary-border: #c7d2fe; --tp-text-main: #0f172a; --tp-text-muted: #64748b; --tp-text-light: #94a3b8; --tp-bg-main: #f1f5f9; --tp-bg-surface: #ffffff; --tp-bg-surface-alt: #f8fafc; --tp-border: #e2e8f0; --tp-border-dark: #000000; --tp-danger: #ef4444; --tp-danger-bg: #fef2f2; }
         * { box-sizing: border-box; }
         body { margin: 0; padding: 0; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; color: var(--tp-text-main); }
         .tp-app { display: flex; flex-direction: column; height: 100vh; background-color: var(--tp-bg-main); width: 100%; }
@@ -489,6 +458,7 @@ const App: React.FC = () => {
         .tp-list-item { display: flex; gap: 0.25rem; margin-bottom: 0.5rem; }
         .tp-icon-btn { padding: 0.5rem; color: var(--tp-danger); background: transparent; border: none; cursor: pointer; }
         .tp-add-btn { width: 100%; padding: 0.625rem; background-color: var(--tp-primary-light); border: 1px dashed var(--tp-primary-border); border-radius: 0.5rem; font-size: 10px; font-weight: bold; color: var(--tp-primary); cursor: pointer; }
+        .tp-empty-selection { height: 10rem; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed var(--tp-border); border-radius: 1rem; background-color: var(--tp-bg-surface-alt); color: var(--tp-text-light); text-align: center; }
 
         /* Template Elements */
         .tp-main-header { display: flex; justify-content: space-between; border-bottom: 4px solid var(--tp-border-dark); padding-bottom: 1rem; }
@@ -611,6 +581,19 @@ const App: React.FC = () => {
                 </div>
 
                 <div className="tp-settings-panel">
+                  {selectedElement.type === 'MAIN_HEADER' && (
+                    <div className="tp-settings-group">
+                      <h3 className="tp-settings-group__title">Header Properties</h3>
+                      <div className="tp-form-group">
+                        <input type="file" ref={fileInputRef} onChange={handleImageUpload} style={{ display: 'none' }} />
+                        <button onClick={() => fileInputRef.current?.click()} className="tp-upload-btn"><ImageIcon size={14} /> Update Logo</button>
+                      </div>
+                      <div className="tp-form-group"><label className="tp-form-group__label">Company Name</label><input type="text" className="tp-input" value={selectedElement.props.companyName} onChange={(e) => updateElementProps(selectedElement.id, { companyName: e.target.value })} /></div>
+                      <div className="tp-form-group"><label className="tp-form-group__label">Report Title</label><input type="text" className="tp-input" value={selectedElement.props.reportTitle} onChange={(e) => updateElementProps(selectedElement.id, { reportTitle: e.target.value })} /></div>
+                      <div className="tp-form-group"><label className="tp-form-group__label">Doc ID</label><input type="text" className="tp-input" value={selectedElement.props.docId} onChange={(e) => updateElementProps(selectedElement.id, { docId: e.target.value })} /></div>
+                    </div>
+                  )}
+
                   {selectedElement.type === 'FOUR_FIELD_GRID' && (
                     <div className="tp-settings-group">
                       <h3 className="tp-settings-group__title">Grid Properties</h3>
@@ -622,13 +605,12 @@ const App: React.FC = () => {
                       ))}
                     </div>
                   )}
-                  {/* ... other properties logic ... */}
                   {selectedElement.type === 'SINGLE_ROW' && <div className="tp-form-group"><label className="tp-form-group__label">Label</label><input type="text" className="tp-input" value={selectedElement.props.label} onChange={(e) => updateElementProps(selectedElement.id, { label: e.target.value })} /></div>}
                   {selectedElement.type === 'ROW' && <>
                     <div className="tp-form-group"><label className="tp-form-group__label">Left Label</label><input type="text" className="tp-input" value={selectedElement.props.leftLabel} onChange={(e) => updateElementProps(selectedElement.id, { leftLabel: e.target.value })} /></div>
                     <div className="tp-form-group"><label className="tp-form-group__label">Right Label</label><input type="text" className="tp-input" value={selectedElement.props.rightLabel} onChange={(e) => updateElementProps(selectedElement.id, { rightLabel: e.target.value })} /></div>
                   </>}
-                  {/* Simplified properties block for briefness since core logic is preserved */}
+                  {selectedElement.type === 'SECTION_HEADER' && <div className="tp-form-group"><label className="tp-form-group__label">Title</label><input type="text" className="tp-input" value={selectedElement.props.text} onChange={(e) => updateElementProps(selectedElement.id, { text: e.target.value })} /></div>}
                 </div>
               </div>
             ) : (
