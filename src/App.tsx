@@ -202,7 +202,7 @@ const TemplateTable = ({ columns, sourceTable, staticRowCount, isPreview, isFlus
   );
 };
 
-const TemplateCheckboxGroup = ({ title, options, columns, mapping, checkedValues, inputType, isPreview, isFlush }: any) => {
+const TemplateCheckboxGroup = ({ title, options, columns, checkedValues, inputType, isPreview, isFlush }: any) => {
   const isRadio = inputType === 'radio';
   return (
     <div className={`tp-checkbox-group ${isFlush ? 'is-flush' : ''}`}>
